@@ -2,9 +2,9 @@
 #include <Arduino.h>
 
 //Led-pinnien määritys
-#define RED_LED 18
+#define RED_LED 16
 #define YELLOW_LED 17
-#define GREEN_LED 16
+#define GREEN_LED 18
 
 void led_init(void){ 
     pinMode(RED_LED, OUTPUT);
@@ -12,20 +12,17 @@ void led_init(void){
     pinMode(GREEN_LED, OUTPUT);
     led_all_off(); //kaikki pois
 }
-void led_set_red(int state){
-     pinMode(RED_LED, state);
+void led_set_red(void){
+    digitalWrite(GREEN_LED, HIGH);
 }
-
-void led_set_yellow(int state){
-    pinMode(YELLOW_LED, state);
-}
-void led_set_green(int state){
-    pinMode(GREEN_LED, state);
-
-}
+void led_set_yellow(void){
+    digitalWrite(YELLOW_LED, HIGH);
+} //asettaa keltaisen ledin päälle
+void led_set_green(void){
+    digitalWrite(RED_LED, HIGH);
+} // asettaa vihreän ledin päälle
 void led_all_off(void){
-    led_set_green(LOW);
-    led_set_yellow(LOW);
-    led_set_red(LOW);
-   
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(RED_LED, LOW);
 }

@@ -5,7 +5,7 @@
 void setup() {
   Serial.begin(115200);
   led_init(); 
-
+  initializePeopleCounter();
   //tänne task alhaalla olevasta
   /*
   xTaskCreate(

@@ -37,3 +37,4 @@ float get_db(float voltage){
   db=20*log10(voltage/vref);
   return db;
 }
+

@@ -1,6 +1,7 @@
 #include "led.h"
 #include "db.h"
 #include "PeopleCounter.h"
+
 #define SAMPLES 100
 
 TaskHandle_t SoundLevelHandle=NULL;
@@ -9,6 +10,10 @@ void setup() {
   Serial.begin(115200);
   led_init(); 
   //initializePeopleCounter();
+  init_soundlevel();
+}
+void loop() {
+}
 
   xTaskCreate(
   start_sound_level, //task-funktio

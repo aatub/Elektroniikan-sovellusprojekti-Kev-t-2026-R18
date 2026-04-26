@@ -2,10 +2,8 @@
 #define DB_H
 
 //aliohjelmat
-void db_init(void); //Alustaa 
+void init_soundlevel(void);//alustaa soundlevel taskin
+float get_db_rms(float); //laskee rms:n avulla desibelin
 float get_rms(void); //laskee keskiarvon 100:n näytteen jälkeen
-float get_db(float voltage); //laskee db:n jännitteen avulla
-float get_voltage(float rms); //Laskee jännitteen keskiarvon mukaan
-
-
+void start_sound_level(void *parameter);
 #endif

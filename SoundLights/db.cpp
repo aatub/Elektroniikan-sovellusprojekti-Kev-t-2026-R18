@@ -8,7 +8,7 @@
 //#define Microphone 34
 //#define amplifier 35
 #define final 39
-#define buzzer 31
+#define buzzer 19 //toinen jalka groundiin
 
 float prev_db=0;
 struct CalibrationPoint {
@@ -91,8 +91,8 @@ void start_sound_level(void *parameter){//Laskee keskiarvon ja sytyttää tarpee
               led_set_yellow();
           }
           else{
+              tone(buzzer,500,200);
               led_set_red();
-              tone(buzzer, 550,400);
               
           }
           float db=get_db_rms(rms);

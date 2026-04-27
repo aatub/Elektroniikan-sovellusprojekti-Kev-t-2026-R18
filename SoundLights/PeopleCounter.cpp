@@ -3,6 +3,7 @@
 // ===== Global Variables =====
 SensorData sensorData = {0};
 SemaphoreHandle_t dataMutex = NULL;
+int globalPeople = 5;
 
 // ===== RTOS Task Functions =====
 void taskReadSensors(void *parameter) {

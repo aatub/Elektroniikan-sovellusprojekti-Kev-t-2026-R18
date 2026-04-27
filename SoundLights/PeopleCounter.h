@@ -32,6 +32,7 @@ struct SensorData {
 // Global
 extern SensorData sensorData;
 extern SemaphoreHandle_t dataMutex;
+extern int globalPeople;
 
 // Sensor reading
 float readUltrasonicDistance(int trigPin, int echoPin);

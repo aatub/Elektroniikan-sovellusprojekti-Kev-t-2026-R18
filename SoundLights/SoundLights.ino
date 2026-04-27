@@ -1,14 +1,26 @@
 #include "led.h"
 #include "db.h"
 #include "PeopleCounter.h"
+#include "lcd.h"
 
-#define SAMPLES 100
+LCDDisplay lcd;
+
+void taskUpdateLCD(void *parameter) {
+    while (true) {
+        lcd.update();
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
 
 void setup() {
-  Serial.begin(115200);
-  led_init(); 
-  //initializePeopleCounter();
-  init_soundlevel();
+    Serial.begin(115200);
+    led_init();
+    init_soundlevel();
+    initializePeopleCounter();
+
+    lcd.begin();  // initialize LCD
+
+    xTaskCreate(taskUpdateLCD, "UpdateLCD", 2048, NULL, 1, NULL);
 }
-void loop() {
-}
+
+void loop() {}

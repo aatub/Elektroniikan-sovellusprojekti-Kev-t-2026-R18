@@ -10,7 +10,9 @@
 #define final 39
 #define buzzer 19 //toinen jalka groundiin
 
+float sharedDb = 0;
 float prev_db=0;
+SemaphoreHandle_t dbMutex = NULL;
 struct CalibrationPoint {
       float adc;
     	float db;
@@ -29,15 +31,16 @@ CalibrationPoint calibration[] = { //manuaalinen kalibrointitaulukko
 const int N = sizeof(calibration) / sizeof(calibration[0]);
 
 void init_soundlevel(void){
-TaskHandle_t SoundLevelHandle=NULL;
-xTaskCreate(
-  start_sound_level, //task-funktio
-  "SoundlevelTask",
-  4096,
-  NULL,
-  1,
-  &SoundLevelHandle
-  );
+    dbMutex = xSemaphoreCreateMutex();
+    TaskHandle_t SoundLevelHandle=NULL;
+    xTaskCreate(
+      start_sound_level, //task-funktio
+      "SoundlevelTask",
+      4096,
+      NULL,
+      1,
+      &SoundLevelHandle
+    );
 }
   
 float get_db_rms(float x) {
@@ -100,6 +103,11 @@ void start_sound_level(void *parameter){//Laskee keskiarvon ja sytyttää tarpee
           prev_db=db;
           //Serial.print("DB: ");
           //Serial.println(db);
+                  if (dbMutex != NULL) {
+            xSemaphoreTake(dbMutex, portMAX_DELAY);
+            sharedDb = db;
+            xSemaphoreGive(dbMutex);
+        }
         vTaskDelay(50/portTICK_PERIOD_MS);
 
   }

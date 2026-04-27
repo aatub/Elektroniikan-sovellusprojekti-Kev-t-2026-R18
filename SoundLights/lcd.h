@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "PeopleCounter.h"
+#include "db.h"
 
 class LCDDisplay {
 private:

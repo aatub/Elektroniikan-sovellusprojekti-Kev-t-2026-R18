@@ -1,6 +1,9 @@
 #include "lcd.h"
+#include "db.h"
 
-LCDDisplay::LCDDisplay() {}
+LCDDisplay::LCDDisplay() {
+    Serial.println("LCD constructor");
+}
 
 void LCDDisplay::begin() {
     Wire.begin(21, 22); //sda, scl
@@ -34,19 +37,20 @@ void LCDDisplay::begin() {
 0x01	Tyhjennä näyttö
 0x06	Kursori siirtyy oikealle
 */
-
 void LCDDisplay::update() {
-    clear();
     setCursor(0, 0);
     print("People:");
+    printNumber(globalPeople);
 
-    xSemaphoreTake(dataMutex, portMAX_DELAY); //mutex lock
-    int count = sensorData.peopleCount;
-    xSemaphoreGive(dataMutex); //mutex free
-    printNumber(globalPeople); // prints people count
-    vTaskDelay(pdMS_TO_TICKS(500));
+    setCursor(0, 1);
+    print("dB:");
+    if (dbMutex != NULL) {
+        xSemaphoreTake(dbMutex, portMAX_DELAY);
+        float db = sharedDb;
+        xSemaphoreGive(dbMutex);
+        printNumber((int)db);
+    }
 }
-
 void LCDDisplay::sendCommand(uint8_t cmd) {
     Wire.beginTransmission(addr); //i2c -> lcd
     Wire.write(0x00); //next byte
@@ -82,3 +86,5 @@ void LCDDisplay::printNumber(int num) {
     sprintf(buf, "%d", num);
     print(buf);
 }
+
+

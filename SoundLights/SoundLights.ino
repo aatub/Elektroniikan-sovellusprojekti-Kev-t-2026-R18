@@ -14,11 +14,12 @@ void taskUpdateLCD(void *parameter) {
 
 void setup() {
     Serial.begin(115200);
+    delay(100);
+    lcd.begin();  // initialize LCD
+    delay(100);
     led_init();
     init_soundlevel();
     initializePeopleCounter();
-
-    lcd.begin();  // initialize LCD
 
     xTaskCreate(taskUpdateLCD, "UpdateLCD", 2048, NULL, 1, NULL);
 }

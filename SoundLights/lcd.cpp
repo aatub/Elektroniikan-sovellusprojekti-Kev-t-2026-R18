@@ -41,6 +41,7 @@ void LCDDisplay::update() {
     setCursor(0, 0);
     print("People:");
     printNumber(globalPeople);
+    print("         ");  // täyttää lopun rivin tyhjällä
 
     setCursor(0, 1);
     print("dB:");
@@ -49,6 +50,7 @@ void LCDDisplay::update() {
         float db = sharedDb;
         xSemaphoreGive(dbMutex);
         printNumber((int)db);
+        print("         ");  // täyttää lopun rivin tyhjällä
     }
 }
 void LCDDisplay::sendCommand(uint8_t cmd) {

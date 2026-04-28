@@ -18,14 +18,13 @@ struct CalibrationPoint {
     	float db;
   };
 CalibrationPoint calibration[] = { //manuaalinen kalibrointitaulukko
-    {10,   30},   // hiljaisuus
-    {30,   40},
-    {60,   50},   // taustamelu
-    {120,  60},   // puhe alkaa
-    {250,  70},   // normaali puhe
+    {40,   30},   // hiljaisuus
+    {50,   40},  
+    {160,  60},
+    {300,  70},   // normaali puhe
     {500,  80},   // kova puhe
     {900,  92},
-    {1300, 100}   // maksimi
+    {1300, 100},  // maksimi
 };
 
 const int N = sizeof(calibration) / sizeof(calibration[0]);
@@ -87,19 +86,19 @@ void start_sound_level(void *parameter){//Laskee keskiarvon ja sytyttää tarpee
     //Serial.print("RMS: ");
     //Serial.println(rms);    
     led_all_off();
-    if (rms < 200){ //sytyttää ledit vihreä <=2500 keltainen >=2500 ja <3000 ja punainen >3000
+    if (rms < 300){ //sytyttää ledit vihreä <=2500 keltainen >=2500 ja <3000 ja punainen >3000
               led_set_green();
           }
-          else if( rms >=200 && rms<1000.0){
+          else if( rms >=300 && rms<1000.0){
               led_set_yellow();
           }
           else{
-              tone(buzzer,500,200);
+              tone(buzzer,500,100);
               led_set_red();
               
           }
           float db=get_db_rms(rms);
-          db= db * 0.8 + prev_db * 0.2; //tasoittaa desibelin heiluntaa aiemmasta arvosta 20% ja uudesta 80%
+          //db= db * 0.8 + prev_db * 0.2; //tasoittaa desibelin heiluntaa aiemmasta arvosta 20% ja uudesta 80%
           prev_db=db;
           //Serial.print("DB: ");
           //Serial.println(db);

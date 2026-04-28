@@ -7,19 +7,22 @@ int globalPeople = 5;
 
 // ===== RTOS Task Functions =====
 void taskReadSensors(void *parameter) {
-  TickType_t lastWakeTime = xTaskGetTickCount();
-  
   while (true) {
+    // Read Right
     float distRight = readUltrasonicDistance(TRIG_PIN_RIGHT, ECHO_PIN_RIGHT);
-    float distLeft = readUltrasonicDistance(TRIG_PIN_LEFT, ECHO_PIN_LEFT);
+    vTaskDelay(pdMS_TO_TICKS(30)); // 30ms "Silence" period for echoes to dissipate
     
+    // Read Left
+    float distLeft = readUltrasonicDistance(TRIG_PIN_LEFT, ECHO_PIN_LEFT);
+    vTaskDelay(pdMS_TO_TICKS(30)); 
+
     if (xSemaphoreTake(dataMutex, portMAX_DELAY)) {
       sensorData.distanceRight = distRight;
       sensorData.distanceLeft = distLeft;
       xSemaphoreGive(dataMutex);
     }
     
-    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(SENSOR_READ_DELAY_MS));
+    vTaskDelay(pdMS_TO_TICKS(20)); // Overall task frequency
   }
 }
 
@@ -59,6 +62,7 @@ void taskDisplayStatus(void *parameter) {
                     sensorData.peopleCount,
                     sensorData.distanceRight,
                     sensorData.distanceLeft);
+      globalPeople = sensorData.peopleCount;
       xSemaphoreGive(dataMutex);
     }
     
@@ -106,28 +110,27 @@ void calculateBaseline() {
 }
 
 void detectMovement() {
-  static unsigned long lastTriggerTime = 0;
-  unsigned long currentTime = millis();
-  
-  // Debounce
-  if (currentTime - lastTriggerTime < 2000) {
-    return;
-  }
-  
   bool rightBlocked = (sensorData.distanceRight < (sensorData.baselineRight - DETECTION_TOLERANCE));
   bool leftBlocked = (sensorData.distanceLeft < (sensorData.baselineLeft - DETECTION_TOLERANCE));
-  
-  if (rightBlocked && !leftBlocked) {
+
+  static unsigned long lastTriggerTime = 0; 
+  unsigned long currentTime = millis();
+
+  if (currentTime - lastTriggerTime < DEBOUCE_DELAY_MS) { 
+    return;
+  }
+
+  if (rightBlocked) {
+    sensorData.peopleCount++;
+    lastTriggerTime = currentTime;
+    Serial.println("ENTRY");
+  }
+  else if (leftBlocked) { 
     if (sensorData.peopleCount > 0) {
       sensorData.peopleCount--;
     }
     lastTriggerTime = currentTime;
     Serial.println("EXIT");
-  }
-  else if (leftBlocked && !rightBlocked) {
-    sensorData.peopleCount++;
-    lastTriggerTime = currentTime;
-    Serial.println("ENTRY");
   }
 }
 
@@ -152,25 +155,25 @@ void initializePeopleCounter() {
   // RTOS tasks
   BaseType_t taskResult;
   
-  taskResult = xTaskCreate(taskReadSensors, "ReadSensors", 2048, NULL, 2, NULL);
+  taskResult = xTaskCreate(taskReadSensors, "ReadSensors", 8182, NULL, 2, NULL);
   if (taskResult != pdPASS) {
     Serial.println("ERROR: ReadSensors");
     return;
   }
   
-  taskResult = xTaskCreate(taskDetectPeople, "DetectPeople", 2048, NULL, 2, NULL);
+  taskResult = xTaskCreate(taskDetectPeople, "DetectPeople", 4096, NULL, 2, NULL);
   if (taskResult != pdPASS) {
     Serial.println("ERROR: DetectPeople");
     return;
   }
   
-  taskResult = xTaskCreate(taskUpdateBaseline, "UpdateBaseline", 2048, NULL, 1, NULL);
+  taskResult = xTaskCreate(taskUpdateBaseline, "UpdateBaseline", 8192, NULL, 1, NULL);
   if (taskResult != pdPASS) {
     Serial.println("ERROR: UpdateBaseline");
     return;
   }
   
-  taskResult = xTaskCreate(taskDisplayStatus, "DisplayStatus", 2048, NULL, 1, NULL);
+  taskResult = xTaskCreate(taskDisplayStatus, "DisplayStatus", 4096, NULL, 1, NULL);
   if (taskResult != pdPASS) {
     Serial.println("ERROR: DisplayStatus");
     return;
